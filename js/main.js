@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { Arena }       from './arena.js?v=3';
-import { Player }      from './player.js?v=3';
-import { Physics }     from './physics.js?v=3';
-import { GameState }   from './gameState.js?v=3';
-import { UI }          from './ui.js?v=3';
-import { LEVELS }      from './levelConfig.js?v=3';
+import { Arena }       from './arena.js?v=4';
+import { Player }      from './player.js?v=4';
+import { Physics }     from './physics.js?v=4';
+import { GameState }   from './gameState.js?v=4';
+import { UI }          from './ui.js?v=4';
+import { LEVELS }      from './levelConfig.js?v=4';
 
 // ─── Renderer ─────────────────────────────────────────────────────────────────
 const renderer = new THREE.WebGLRenderer({ antialias: true });

@@ -31,6 +31,9 @@ export class Arena {
     const spacingExtra     = config ? config.hexMinSpacingExtra  : 0.7;
     const movingCount      = config ? config.movingTileCount     : 0;
     const timedCount       = config ? config.timedTileCount      : 0;
+    const ghostCount       = config ? (config.ghostTileCount  || 0) : 0;
+    const shrinkCount      = config ? (config.shrinkTileCount || 0) : 0;
+    const shrinkDuration   = config ? (config.shrinkTileDuration || 15) : 15;
 
     this.hexRadius = radius;
     const MIN_SPACING = radius * 2 + spacingExtra;
@@ -87,33 +90,97 @@ export class Arena {
       h.mesh.children[0].material.emissive.setHex(0x441100);
       h.mesh.children[1].material.color.setHex(0xff5500);
     });
+
+    // ── Designate ghost tiles (non-moving, non-timed only) ──
+    const nonSpecial1 = Array.from({ length: this.hexagons.length }, (_, i) => i)
+      .filter(i => this.hexagons[i].type === 'normal')
+      .sort(() => Math.random() - 0.5);
+    nonSpecial1.slice(0, ghostCount).forEach(i => {
+      const h = this.hexagons[i];
+      h.type          = 'ghost';
+      h.ghostPhase    = Math.random() * Math.PI * 2;
+      h.ghostCycleTime = 2.4 + Math.random() * 0.6; // 2.4–3.0 s
+      h.isVisible     = true;
+      // Purple/violet appearance
+      h.mesh.children[0].material.color.setHex(0xaa44ff);
+      h.mesh.children[0].material.emissive.setHex(0x220044);
+      h.mesh.children[1].material.color.setHex(0xcc66ff);
+      h.mesh.children[1].material.transparent = true;
+    });
+
+    // ── Designate shrink tiles (non-moving, non-timed, non-ghost only) ──
+    const nonSpecial2 = Array.from({ length: this.hexagons.length }, (_, i) => i)
+      .filter(i => this.hexagons[i].type === 'normal')
+      .sort(() => Math.random() - 0.5);
+    nonSpecial2.slice(0, shrinkCount).forEach(i => {
+      const h = this.hexagons[i];
+      h.type          = 'shrink';
+      h.tileRadius    = radius;
+      h.shrinkAge     = 0;
+      h.shrinkDuration = shrinkDuration;
+      // Gold/yellow appearance
+      h.mesh.children[0].material.color.setHex(0xffdd00);
+      h.mesh.children[0].material.emissive.setHex(0x442200);
+      h.mesh.children[1].material.color.setHex(0xffaa00);
+    });
   }
 
-  // ─── Per-frame update: move the moving tiles ──────────────────────────────
+  // ─── Per-frame update: moving tiles, ghost flicker, shrink tiles ──────────
   update(delta) {
     this.time += delta;
-    for (const h of this.hexagons) {
-      if (h.type !== 'moving') continue;
-      const offset = h.amplitude * Math.sin(h.speed * this.time + h.phase);
-      if (h.axis === 'x') {
-        h.x = h.baseX + offset;
-        h.mesh.position.x = h.x;
-      } else {
-        h.z = h.baseZ + offset;
-        h.mesh.position.z = h.z;
+    const toRemove = [];
+
+    for (let i = 0; i < this.hexagons.length; i++) {
+      const h = this.hexagons[i];
+
+      if (h.type === 'moving') {
+        const offset = h.amplitude * Math.sin(h.speed * this.time + h.phase);
+        if (h.axis === 'x') {
+          h.x = h.baseX + offset;
+          h.mesh.position.x = h.x;
+        } else {
+          h.z = h.baseZ + offset;
+          h.mesh.position.z = h.z;
+        }
+
+      } else if (h.type === 'ghost') {
+        h.ghostPhase = (h.ghostPhase + delta * (Math.PI * 2 / h.ghostCycleTime)) % (Math.PI * 2);
+        const sinVal  = Math.sin(h.ghostPhase);
+        h.isVisible   = sinVal > 0;
+        const opacity = Math.max(0, sinVal);
+        h.mesh.children[0].material.opacity = Math.max(0.05, opacity * 0.85);
+        h.mesh.children[1].material.opacity = opacity;
+        h.mesh.visible = opacity > 0.02;
+
+      } else if (h.type === 'shrink') {
+        h.shrinkAge += delta;
+        const scale = Math.max(0, 1 - h.shrinkAge / h.shrinkDuration);
+        h.tileRadius = this.hexRadius * scale;
+        h.mesh.scale.set(scale, 1, scale);
+        if (scale <= 0) toRemove.push(i);
       }
+    }
+
+    // Remove fully-shrunk tiles (in reverse so indices stay valid)
+    for (let i = toRemove.length - 1; i >= 0; i--) {
+      this.removeHexagon(toRemove[i]);
     }
   }
 
   // ─── Landing check: closest point on 1×1 square to hex center ────────────
   checkLanding(px, pz) {
-    const threshold = this.hexRadius * 0.87;
-    const h = 0.5;
+    const h_half = 0.5;
     for (let i = 0; i < this.hexagons.length; i++) {
-      const { x, z } = this.hexagons[i];
-      const cx   = Math.max(px - h, Math.min(x, px + h));
-      const cz   = Math.max(pz - h, Math.min(z, pz + h));
-      const dist = Math.sqrt((cx - x) ** 2 + (cz - z) ** 2);
+      const hex = this.hexagons[i];
+      // Ghost tiles are only landable when visible
+      if (hex.type === 'ghost' && !hex.isVisible) continue;
+      // Use per-tile radius (supports shrink tiles with shrinking hitbox)
+      const tileRadius = (hex.tileRadius !== undefined) ? hex.tileRadius : this.hexRadius;
+      const threshold  = tileRadius * 0.87;
+      if (threshold < 0.1) continue; // fully shrunk, skip
+      const cx   = Math.max(px - h_half, Math.min(hex.x, px + h_half));
+      const cz   = Math.max(pz - h_half, Math.min(hex.z, pz + h_half));
+      const dist = Math.sqrt((cx - hex.x) ** 2 + (cz - hex.z) ** 2);
       if (dist < threshold) return i;
     }
     return -1;

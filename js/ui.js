@@ -125,11 +125,14 @@ export class UI {
   buildLevelGrid(levels, onSelect) {
     this.levelGrid.innerHTML = '';
     const diffColors = {
-      EASY:   '#00ff88',
-      NORMAL: '#00ccff',
-      MEDIUM: '#ffcc00',
-      HARD:   '#ff8800',
-      EXPERT: '#ff3333',
+      EASY:      '#00ff88',
+      NORMAL:    '#00ccff',
+      MEDIUM:    '#ffcc00',
+      HARD:      '#ff8800',
+      EXPERT:    '#ff3333',
+      BRUTAL:    '#ff6600',
+      NIGHTMARE: '#ff0044',
+      LEGEND:    '#ff00cc',
     };
     levels.forEach(level => {
       const card = document.createElement('div');
