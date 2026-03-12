@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hexagon Shooter</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="hud">
+    <div id="hud-top">
+      <div id="round-display">Round: 1</div>
+      <div id="meter-container">
+        <div id="meter-label">POWER</div>
+        <div id="meter-bar-bg">
+          <div id="meter-bar-fill"></div>
+        </div>
+        <div id="meter-percent">10%</div>
+      </div>
+      <div id="best-display">Best: 0</div>
+    </div>
+    <div id="aim-hint">Use arrow keys to aim</div>
+    <button id="shoot-btn">SHOOT</button>
+  </div>
+
+  <div id="game-over" class="hidden">
+    <div id="game-over-content">
+      <h1>GAME OVER</h1>
+      <div id="final-score">Score: 0</div>
+      <div id="final-best">Personal Best: 0</div>
+      <button id="restart-btn">PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
