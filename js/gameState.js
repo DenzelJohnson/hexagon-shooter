@@ -1,34 +1,39 @@
 export class GameState {
   constructor() {
     this.personalBest = parseInt(localStorage.getItem('hexShooterBest') || '0');
+    this._config      = null;
+    this.targetRounds = 5;
+    this.reset();
+  }
+
+  // Call before starting a level
+  setLevel(config) {
+    this._config      = config;
+    this.targetRounds = config.roundsToWin;
     this.reset();
   }
 
   reset() {
-    this.round = 0;        // rounds successfully completed
-    this.meterPercent = 10; // power for current shot
+    this.round        = 0;   // rounds successfully completed
+    this.isWon        = false;
+    this.meterPercent = this._config ? this._config.startingPower : 10;
   }
 
   nextRound() {
-    this.round += 1;
-    this.meterPercent = Math.min(100, 10 + this.round * 5);
-  }
+    this.round++;
+    const cfg = this._config;
+    this.meterPercent = cfg
+      ? Math.min(100, cfg.startingPower + this.round * cfg.powerPerRound)
+      : Math.min(100, 10 + this.round * 5);
 
-  get score() {
-    return this.round;
-  }
+    if (this.round >= this.targetRounds) this.isWon = true;
 
-  // Launch speed in units/sec based on current meter
-  get launchSpeed() {
-    const MIN = 10;
-    const MAX = 35;
-    return MIN + (this.meterPercent / 100) * (MAX - MIN);
-  }
-
-  savePersonalBest() {
-    if (this.score > this.personalBest) {
-      this.personalBest = this.score;
+    if (this.round > this.personalBest) {
+      this.personalBest = this.round;
       localStorage.setItem('hexShooterBest', this.personalBest.toString());
     }
   }
+
+  get score()       { return this.round; }
+  get launchSpeed() { return 10 + (this.meterPercent / 100) * 25; }
 }

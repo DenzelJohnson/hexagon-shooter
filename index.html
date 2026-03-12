@@ -14,9 +14,29 @@
   </script>
 </head>
 <body>
-  <div id="hud">
+
+  <!-- ── Home Screen ─────────────────────────────────────────────────────── -->
+  <div id="home-screen">
+    <div id="home-content">
+      <div id="home-title">HEXAGON<br>SHOOTER</div>
+      <div id="home-subtitle">A PHYSICS PLATFORMER</div>
+      <button id="play-btn">PLAY CAMPAIGN</button>
+    </div>
+  </div>
+
+  <!-- ── Level Select ────────────────────────────────────────────────────── -->
+  <div id="level-select" class="hidden">
+    <div id="level-select-content">
+      <div id="level-select-title">SELECT LEVEL</div>
+      <div id="level-grid"></div>
+      <button id="back-btn">← BACK</button>
+    </div>
+  </div>
+
+  <!-- ── Game HUD ─────────────────────────────────────────────────────────  -->
+  <div id="hud" class="hidden">
     <div id="hud-top">
-      <div id="round-display">Round: 1</div>
+      <div id="level-name-display">Level</div>
       <div id="meter-container">
         <div id="meter-label">POWER</div>
         <div id="meter-bar-bg">
@@ -24,21 +44,47 @@
         </div>
         <div id="meter-percent">10%</div>
       </div>
-      <div id="best-display">Best: 0</div>
+      <div id="round-display">0 / 5</div>
     </div>
-    <div id="aim-hint">Use arrow keys to aim</div>
+
+    <!-- Timed-tile countdown bar -->
+    <div id="countdown-wrap" class="hidden">
+      <div id="countdown-text">SHOOT!</div>
+      <div id="countdown-bg">
+        <div id="countdown-fill"></div>
+      </div>
+    </div>
+
+    <div id="aim-hint">Use ← → arrow keys to aim</div>
     <button id="shoot-btn">SHOOT</button>
   </div>
 
-  <div id="game-over" class="hidden">
-    <div id="game-over-content">
-      <h1>GAME OVER</h1>
-      <div id="final-score">Score: 0</div>
-      <div id="final-best">Personal Best: 0</div>
-      <button id="restart-btn">PLAY AGAIN</button>
+  <!-- ── Win Screen ───────────────────────────────────────────────────────  -->
+  <div id="win-screen" class="hidden">
+    <div id="win-content">
+      <div id="win-title">LEVEL COMPLETE!</div>
+      <div id="win-level-name"></div>
+      <div id="win-rounds"></div>
+      <div id="win-buttons">
+        <button id="next-level-btn">NEXT LEVEL →</button>
+        <button id="levels-win-btn">LEVEL SELECT</button>
+      </div>
     </div>
   </div>
 
-  <script type="module" src="js/main.js"></script>
+  <!-- ── Game Over ────────────────────────────────────────────────────────  -->
+  <div id="game-over" class="hidden">
+    <div id="game-over-content">
+      <h1>GAME OVER</h1>
+      <div id="final-score">Round 0 / 5</div>
+      <div id="final-best">Personal Best: 0</div>
+      <div id="gameover-buttons">
+        <button id="retry-btn">RETRY</button>
+        <button id="levels-go-btn">LEVEL SELECT</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js?v=3"></script>
 </body>
 </html>

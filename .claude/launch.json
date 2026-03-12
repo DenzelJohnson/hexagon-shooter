@@ -4,7 +4,7 @@
     {
       "name": "hexagon-shooter",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "3456"],
+      "runtimeArgs": ["server.py"],
       "port": 3456
     }
   ]
